@@ -5,12 +5,16 @@ export const formConfig = {
         name: '',
         age: '',
         gender: '',
+        agreeToTerms: false,
+        comments: '',
     },
-    validationSchema: {
+    validationSchema: yup.object({
         name: yup.string().required('Name is required'),
         age: yup.number().required('Age is required').min(0, 'Age must be greater than zero'),
         gender: yup.string().required('Gender is required'),
-    },
+        agreeToTerms: yup.bool().oneOf([true], 'You must agree to the terms'),
+        comments: yup.string().required('Comments are required'),
+    }),
     fields: [
         { name: 'name', type: 'text', label: 'Name' },
         { name: 'age', type: 'text', label: 'Age' },
@@ -24,5 +28,7 @@ export const formConfig = {
                 { value: 'other', label: 'Other' },
             ],
         },
+        { name: 'agreeToTerms', type: 'checkbox', label: 'Agree to Terms' },
+        { name: 'comments', type: 'textarea', label: 'Comments' },
     ],
 };
