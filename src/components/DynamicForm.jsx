@@ -1,53 +1,89 @@
 import React from 'react';
 import { useFormik } from 'formik';
-import * as yup from 'yup';
-import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { TextField, Checkbox, FormControlLabel, Select, MenuItem, Button, TextareaAutosize } from '@mui/material';
 
-export const DynamicForm = ({ config }) => {
-    const validationSchema = yup.object().shape(config.validationSchema);
+const DynamicForm = ({ config }) => {
+    const { initialValues, validationSchema, fields } = config;
     const formik = useFormik({
-        initialValues: config.initialValues,
-        validationSchema: validationSchema,
+        initialValues,
+        validationSchema,
         onSubmit: (values) => {
-            alert(JSON.stringify(values, null, 2));
+            console.log(values);
         },
     });
 
-    return (
-        <form onSubmit={formik.handleSubmit}>
-            {config.fields.map((field) => (
-                <div key={field.name} style={{ marginBottom: '16px' }}>
-                    {field.type === 'text' && (
-                        <TextField
-                            fullWidth
-                            id={field.name}
-                            name={field.name}
-                            label={field.label}
-                            value={formik.values[field.name]}
-                            onChange={formik.handleChange}
-                            error={formik.touched[field.name] && Boolean(formik.errors[field.name])}
-                            helperText={formik.touched[field.name] && formik.errors[field.name]}
-                        />
-                    )}
-                    {field.type === 'select' && (
-                        <FormControl fullWidth>
-                            <InputLabel id={`${field.name}-label`}>{field.label}</InputLabel>
-                            <Select
-                                labelId={`${field.name}-label`}
+    const renderField = (field) => {
+        switch (field.type) {
+            case 'text':
+                return (
+                    <TextField
+                        key={field.name}
+                        id={field.name}
+                        name={field.name}
+                        label={field.label}
+                        value={formik.values[field.name]}
+                        onChange={formik.handleChange}
+                        error={formik.touched[field.name] && Boolean(formik.errors[field.name])}
+                        helperText={formik.touched[field.name] && formik.errors[field.name]}
+                    />
+                );
+            case 'select':
+                return (
+                    <TextField
+                        key={field.name}
+                        select
+                        id={field.name}
+                        name={field.name}
+                        label={field.label}
+                        value={formik.values[field.name]}
+                        onChange={formik.handleChange}
+                        error={formik.touched[field.name] && Boolean(formik.errors[field.name])}
+                        helperText={formik.touched[field.name] && formik.errors[field.name]}
+                    >
+                        {field.options.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                );
+            case 'checkbox':
+                return (
+                    <FormControlLabel
+                        key={field.name}
+                        control={
+                            <Checkbox
                                 id={field.name}
                                 name={field.name}
-                                value={formik.values[field.name]}
+                                checked={formik.values[field.name]}
                                 onChange={formik.handleChange}
-                                error={formik.touched[field.name] && Boolean(formik.errors[field.name])}
-                            >
-                                {field.options.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    )}
+                            />
+                        }
+                        label={field.label}
+                    />
+                );
+            case 'textarea':
+                return (
+                    <TextareaAutosize
+                        key={field.name}
+                        id={field.name}
+                        name={field.name}
+                        label={field.label}
+                        value={formik.values[field.name]}
+                        onChange={formik.handleChange}
+                        style={{ width: '100%', minHeight: '100px' }}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <form onSubmit={formik.handleSubmit}>
+            {fields.map((field) => (
+                <div key={field.name} style={{ marginBottom: '16px' }}>
+                    {renderField(field)}
                 </div>
             ))}
             <Button color="primary" variant="contained" type="submit">
